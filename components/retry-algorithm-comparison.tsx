@@ -197,7 +197,7 @@ const RetryAlgorithmComparison: React.FC = () => {
         {isDescriptionOpen && (
           <div className="p-4 h-full relative">
             <div className="mb-4">
-              <h2 className="text-2xl font-bold">Retry Algorithm Comparison Tool</h2>
+              <h2 className="text-2xl font-bold">Retry Algorithm Comparison</h2>
               <p className="text-sm text-muted-foreground">
                 Compare linear, exponential, and capped exponential backoff strategies with configurable jitter
               </p>
@@ -209,7 +209,7 @@ const RetryAlgorithmComparison: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold">What is Retry Algorithm?</h3>
+                  <h3 className="font-semibold">What are Retry Algorithms?</h3>
                   <p className="text-sm text-muted-foreground">
                     A retry algorithm determines how long to wait between repeated attempts to perform an action that has failed.
                     Different strategies offer various trade-offs between aggressive retries and avoiding system overload.
@@ -220,7 +220,7 @@ const RetryAlgorithmComparison: React.FC = () => {
                   <h3 className="font-semibold">Available Strategies</h3>
                   <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
                     <li>
-                      <span className="font-medium">Linear Backoff:</span> Increases wait time by a fixed amount each retry
+                      <span className="font-medium">Linear Retry:</span> Increases wait time by a fixed amount each retry
                     </li>
                     <li>
                       <span className="font-medium">Exponential Backoff:</span> Doubles (or multiplies) wait time each retry
@@ -252,7 +252,7 @@ const RetryAlgorithmComparison: React.FC = () => {
       <Card className="flex-1">
         <CardContent className="p-6">
           <div className="mb-6">
-            <Label htmlFor="globalMaxRetries">Global Max Retries: {globalMaxRetries}</Label>
+            <Label htmlFor="globalMaxRetries">Max Retries: {globalMaxRetries}</Label>
             <Slider
               id="globalMaxRetries"
               min={1}
