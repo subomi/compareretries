@@ -1,16 +1,17 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import React, { useState, useMemo, useRef } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { ChevronRight, Trash2, Edit } from 'lucide-react'
+import { ChevronLeft, Trash2, Edit, Menu, Download } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
+import html2canvas from 'html2canvas'
 
 interface RetryConfig {
   type: 'linear' | 'exponential' | 'capped-exponential'
@@ -46,6 +47,18 @@ const calculateRetryDurations = (config: RetryConfig, maxRetries: number): numbe
   return durations
 }
 
+const formatTime = (milliseconds: number): string => {
+  if (milliseconds < 1000) {
+    return `${milliseconds.toFixed(2)}ms`
+  } else if (milliseconds < 60000) {
+    return `${(milliseconds / 1000).toFixed(2)}s`
+  } else if (milliseconds < 3600000) {
+    return `${(milliseconds / 60000).toFixed(2)}m`
+  } else {
+    return `${(milliseconds / 3600000).toFixed(2)}h`
+  }
+}
+
 const RetryAlgorithmComparison: React.FC = () => {
   const [configs, setConfigs] = useState<RetryConfig[]>([])
   const [newConfig, setNewConfig] = useState<RetryConfig>({
@@ -59,6 +72,7 @@ const RetryAlgorithmComparison: React.FC = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [globalMaxRetries, setGlobalMaxRetries] = useState(5)
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(true)
+  const chartRef = useRef<HTMLDivElement>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -129,8 +143,51 @@ const RetryAlgorithmComparison: React.FC = () => {
     return data
   }, [configs, globalMaxRetries])
 
+  const handleExport = async () => {
+    const exportContainer = document.createElement('div');
+    exportContainer.style.padding = '20px';
+    exportContainer.style.backgroundColor = 'white';
+    
+    const tableClone = document.querySelector('table')?.cloneNode(true) as HTMLElement;
+    if (tableClone) {
+      tableClone.style.marginBottom = '20px';
+      exportContainer.appendChild(tableClone);
+    }
+    
+    if (chartRef.current) {
+      exportContainer.appendChild(chartRef.current.cloneNode(true));
+    }
+    
+    document.body.appendChild(exportContainer);
+    
+    const canvas = await html2canvas(exportContainer);
+    const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    const link = document.createElement('a');
+    link.download = 'retry-algorithm-comparison.png';
+    link.href = image;
+    link.click();
+    
+    document.body.removeChild(exportContainer);
+  };
+
   return (
     <div className="flex min-h-screen w-full">
+      <div className="flex flex-col items-center py-4 bg-gray-100 border-r border-gray-200">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
+          className="mb-4"
+        >
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">{isDescriptionOpen ? 'Close' : 'Open'} description</span>
+        </Button>
+        {!isDescriptionOpen && (
+          <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer" className="mt-auto">
+            <img src="https://getconvoy.io/svg/convoy-logo-new.svg" alt="Convoy" className="w-6 h-6" />
+          </a>
+        )}
+      </div>
       <div
         className={`
           transition-all duration-300 ease-in-out overflow-hidden
@@ -139,21 +196,11 @@ const RetryAlgorithmComparison: React.FC = () => {
       >
         {isDescriptionOpen && (
           <div className="p-4 h-full relative">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold">Retry Algorithm Comparison Tool</h2>
-                <p className="text-sm text-muted-foreground">
-                  Compare linear, exponential, and capped exponential backoff strategies with configurable jitter
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIsDescriptionOpen(false)}
-              >
-                <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">Close description</span>
-              </Button>
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold">Retry Algorithm Comparison Tool</h2>
+              <p className="text-sm text-muted-foreground">
+                Compare linear, exponential, and capped exponential backoff strategies with configurable jitter
+              </p>
             </div>
 
             <Card>
@@ -192,26 +239,17 @@ const RetryAlgorithmComparison: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-            <div className="absolute bottom-4 left-4 flex items-center space-x-2">
+            <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center justify-center space-y-2">
               <span className="text-sm text-muted-foreground">Built By</span>
-              <img src="https://getconvoy.io/svg/convoy-logo-full-new.svg" alt="Convoy" className="h-6" />
+              <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer">
+                <img src="https://getconvoy.io/svg/convoy-logo-full-new.svg" alt="Convoy" className="h-6" />
+              </a>
             </div>
           </div>
         )}
       </div>
 
-      {!isDescriptionOpen && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="fixed top-4 left-4 z-50"
-          onClick={() => setIsDescriptionOpen(true)}
-        >
-          <ChevronRight className="h-4 w-4 rotate-180" />
-        </Button>
-      )}
-
-      <Card className={`flex-1 transition-all duration-300 ease-in-out ${isDescriptionOpen ? 'w-[70%]' : 'w-full'}`}>
+      <Card className="flex-1">
         <CardContent className="p-6">
           <div className="mb-6">
             <Label htmlFor="globalMaxRetries">Global Max Retries: {globalMaxRetries}</Label>
@@ -351,25 +389,34 @@ const RetryAlgorithmComparison: React.FC = () => {
             </TableBody>
           </Table>
 
-          <div className="h-[400px] pl-4">
+          <div className="h-[400px]" ref={chartRef}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
+              <LineChart 
+                data={chartData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="retryCount" 
                   type="number"
                   domain={[0, globalMaxRetries]}
                   tickFormatter={(value) => `${value}`}
+                  label={{ value: "Number of Retries", position: "bottom", offset: 0 }}
                 />
                 <YAxis 
-                  tickFormatter={(value) => `${(value / 1000).toFixed(2)}s`}
+                  tickFormatter={(value) => formatTime(value)}
                   width={80}
                 />
                 <Tooltip 
-                  formatter={(value: number) => `${(value / 1000).toFixed(2)}s`}
+                  formatter={(value: number) => formatTime(value)}
                   labelFormatter={(label: number) => `Retry Count: ${label}`}
                 />
-                <Legend />
+                <Legend 
+                  verticalAlign="top"
+                  align="center"
+                  layout="horizontal"
+                  margin={{ top: 0, left: 0, right: 0, bottom: 10 }}
+                />
                 {configs.map((_, index) => (
                   <Line
                     key={index}
@@ -380,6 +427,12 @@ const RetryAlgorithmComparison: React.FC = () => {
                 ))}
               </LineChart>
             </ResponsiveContainer>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={handleExport}>
+              <Download className="mr-2 h-4 w-4" />
+              Export Chart and Configuration
+            </Button>
           </div>
         </CardContent>
       </Card>
