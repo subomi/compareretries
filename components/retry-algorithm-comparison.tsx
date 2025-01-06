@@ -171,19 +171,19 @@ const RetryAlgorithmComparison: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
-      <div className="flex flex-col items-center py-4 bg-gray-100 border-r border-gray-200">
+    <div className="flex flex-col lg:flex-row min-h-screen w-full">
+      <div className="flex lg:flex-col items-center justify-between lg:justify-start p-4 lg:py-4 bg-gray-100 border-b lg:border-r border-gray-200">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
-          className="mb-4"
+          className="lg:mb-4"
         >
           <Menu className="h-6 w-6" />
           <span className="sr-only">{isDescriptionOpen ? 'Close' : 'Open'} description</span>
         </Button>
         {!isDescriptionOpen && (
-          <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer" className="mt-auto">
+          <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer" className="lg:mt-auto">
             <img src="https://getconvoy.io/svg/convoy-logo-new.svg" alt="Convoy" className="w-6 h-6" />
           </a>
         )}
@@ -191,11 +191,11 @@ const RetryAlgorithmComparison: React.FC = () => {
       <div
         className={`
           transition-all duration-300 ease-in-out overflow-hidden
-          ${isDescriptionOpen ? 'w-[30%] min-w-[250px]' : 'w-0'}
+          ${isDescriptionOpen ? 'h-[300px] lg:h-auto lg:w-[30%] lg:min-w-[250px]' : 'h-0 lg:w-0'}
         `}
       >
         {isDescriptionOpen && (
-          <div className="p-4 h-full relative">
+          <div className="p-4 h-full flex flex-col">
             <div className="mb-4">
               <h2 className="text-2xl font-bold">Retry Algorithm Comparison</h2>
               <p className="text-sm text-muted-foreground">
@@ -203,11 +203,11 @@ const RetryAlgorithmComparison: React.FC = () => {
               </p>
             </div>
 
-            <Card>
+            <Card className="flex-grow overflow-hidden flex flex-col">
               <CardHeader>
                 <CardTitle>About</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
                 <div>
                   <h3 className="font-semibold">What are Retry Algorithms?</h3>
                   <p className="text-sm text-muted-foreground">
@@ -238,19 +238,19 @@ const RetryAlgorithmComparison: React.FC = () => {
                   </p>
                 </div>
               </CardContent>
+              <div className="mt-4 hidden lg:flex flex-col items-center justify-center space-y-2">
+                <span className="text-sm text-muted-foreground">Built By</span>
+                <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer">
+                  <img src="https://getconvoy.io/svg/convoy-logo-full-new.svg" alt="Convoy" className="h-6" />
+                </a>
+              </div>
             </Card>
-            <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center justify-center space-y-2">
-              <span className="text-sm text-muted-foreground">Built By</span>
-              <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer">
-                <img src="https://getconvoy.io/svg/convoy-logo-full-new.svg" alt="Convoy" className="h-6" />
-              </a>
-            </div>
           </div>
         )}
       </div>
 
-      <Card className="flex-1">
-        <CardContent className="p-6">
+      <Card className="flex-1 overflow-hidden">
+        <CardContent className="p-4 lg:p-6">
           <div className="mb-6">
             <Label htmlFor="globalMaxRetries">Max Retries: {globalMaxRetries}</Label>
             <Slider
@@ -266,9 +266,9 @@ const RetryAlgorithmComparison: React.FC = () => {
 
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="mb-4">Add New Configuration</Button>
+              <Button className="mb-4 w-full lg:w-auto">Add New Configuration</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>{editingIndex !== null ? 'Edit Configuration' : 'Add New Configuration'}</DialogTitle>
               </DialogHeader>
@@ -276,7 +276,7 @@ const RetryAlgorithmComparison: React.FC = () => {
                 e.preventDefault()
                 editingIndex !== null ? handleUpdateConfig() : handleAddConfig()
               }} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="type">Algorithm Type</Label>
                     <select
@@ -344,52 +344,54 @@ const RetryAlgorithmComparison: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <Button type="submit">{editingIndex !== null ? 'Update' : 'Add'} Configuration</Button>
+                <Button type="submit" className="w-full">{editingIndex !== null ? 'Update' : 'Add'} Configuration</Button>
               </form>
             </DialogContent>
           </Dialog>
 
-          <Table className="mb-6">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Config #</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Initial Delay</TableHead>
-                <TableHead>Factor</TableHead>
-                <TableHead>Max Duration</TableHead>
-                <TableHead>Jitter</TableHead>
-                <TableHead>Jitter Range</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {configs.map((config, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{config.type}</TableCell>
-                  <TableCell>{config.initialDelay}</TableCell>
-                  <TableCell>{config.factor}</TableCell>
-                  <TableCell>{config.maxDuration || 'N/A'}</TableCell>
-                  <TableCell>{config.jitter ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>{config.jitter ? `±${config.jitterRange}ms` : 'N/A'}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="icon" onClick={() => handleEditConfig(index)}>
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit configuration {index + 1}</span>
-                      </Button>
-                      <Button variant="outline" size="icon" onClick={() => handleDeleteConfig(index)}>
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete configuration {index + 1}</span>
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table className="mb-6">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">Config #</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Initial Delay</TableHead>
+                  <TableHead>Factor</TableHead>
+                  <TableHead>Max Duration</TableHead>
+                  <TableHead>Jitter</TableHead>
+                  <TableHead>Jitter Range</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {configs.map((config, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{config.type}</TableCell>
+                    <TableCell>{config.initialDelay}</TableCell>
+                    <TableCell>{config.factor}</TableCell>
+                    <TableCell>{config.maxDuration || 'N/A'}</TableCell>
+                    <TableCell>{config.jitter ? 'Yes' : 'No'}</TableCell>
+                    <TableCell>{config.jitter ? `±${config.jitterRange}ms` : 'N/A'}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="icon" onClick={() => handleEditConfig(index)}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit configuration {index + 1}</span>
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => handleDeleteConfig(index)}>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete configuration {index + 1}</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
-          <div className="h-[400px]" ref={chartRef}>
+          <div className="h-[300px] lg:h-[400px]" ref={chartRef}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart 
                 data={chartData}
@@ -429,16 +431,21 @@ const RetryAlgorithmComparison: React.FC = () => {
             </ResponsiveContainer>
           </div>
           <div className="mt-4 flex justify-end">
-            <Button onClick={handleExport}>
+            <Button onClick={handleExport} className="w-full lg:w-auto">
               <Download className="mr-2 h-4 w-4" />
               Export Chart and Configuration
             </Button>
           </div>
         </CardContent>
       </Card>
+      <div className="mt-4 flex flex-col items-center justify-center space-y-2 lg:hidden">
+        <span className="text-sm text-muted-foreground">Built By</span>
+        <a href="https://getconvoy.io/?utm_source=compareretries" target="_blank" rel="noopener noreferrer">
+          <img src="https://getconvoy.io/svg/convoy-logo-full-new.svg" alt="Convoy" className="h-6" />
+        </a>
+      </div>
     </div>
   )
 }
 
 export default RetryAlgorithmComparison
-
